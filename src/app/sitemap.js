@@ -2,7 +2,7 @@
 import { getProducts } from "../lib/contentful"; 
 
 export default async function sitemap() {
-  const baseUrl = 'https://www.aurelian.com';
+  const baseUrl = 'https://aurelian-ecommerce.vercel.app/';
 
   const staticRoutes = [
     '',

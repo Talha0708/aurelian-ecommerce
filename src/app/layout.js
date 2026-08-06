@@ -10,7 +10,7 @@ import { getAnnouncementHeadlines } from "../lib/contentful";
 
 export const metadata = {
   // 🎯 আপনার আসল ডোমেইন নাম এখানে বসাবেন (যেমন: https://aurelian.com.bd)
-  metadataBase: new URL('https://www.aurelian.com'), 
+  metadataBase: new URL('https://aurelian-ecommerce.vercel.app/'), 
   title: {
     default: 'Aurelian | Premium Menswear & Timepieces',
     template: '%s | Aurelian'
@@ -19,7 +19,7 @@ export const metadata = {
   openGraph: {
     title: 'Aurelian | Premium Menswear & Timepieces',
     description: 'Redefining premium Panjabis and classic timepieces for the modern gentleman in Bangladesh.',
-    url: 'https://www.aurelian.com',
+    url: 'https://aurelian-ecommerce.vercel.app/',
     siteName: 'Aurelian',
     images: [
       {

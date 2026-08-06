@@ -6,32 +6,6 @@ import { useCart } from '../context/CartContext';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// 🎯 Contentful Rich Text Imports
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { BLOCKS, MARKS } from '@contentful/rich-text-types';
-
-// 🎯 Contentful Render Options (UI স্টাইলিংয়ের জন্য)
-const renderOptions = {
-  renderMark: {
-    [MARKS.BOLD]: (text) => <strong className="font-semibold text-white">{text}</strong>,
-  },
-  renderNode: {
-    [BLOCKS.PARAGRAPH]: (node, children) => (
-      <p className="text-gray-400 font-light leading-relaxed mb-5 text-lg">
-        {children}
-      </p>
-    ),
-    [BLOCKS.UL_LIST]: (node, children) => (
-      <ul className="list-disc pl-5 mb-5 text-gray-400 font-light leading-relaxed space-y-2 text-lg">
-        {children}
-      </ul>
-    ),
-    [BLOCKS.LIST_ITEM]: (node, children) => (
-      <li>{children}</li>
-    ),
-  },
-};
-
 export default function ProductClient({ product, relatedProducts = [] }) {
   const router = useRouter();
   const { addToCart, buyNow } = useCart();
@@ -292,10 +266,11 @@ export default function ProductClient({ product, relatedProducts = [] }) {
                     width={0}
                     height={0}
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    style={{ width: '100%', height: 'auto' }}
+                    style={{ width: '100%', height: 'auto' }} // 🎯 ইমেজ তার ন্যাচারাল রেশিও অনুযায়ী জায়গা নিবে
                     className="transition-opacity duration-300 group-hover:opacity-90"
                     priority
                   />
+                  {/* Click to view indicator */}
                   <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur border border-white/10 text-white/70 text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
@@ -319,7 +294,7 @@ export default function ProductClient({ product, relatedProducts = [] }) {
                         alt={`Thumbnail ${index + 1}`} 
                         fill 
                         sizes="96px"
-                        className="object-cover"
+                        className="object-cover" // 🎯 থাম্বনেইলে কোনো প্যাডিং/বর্ডার থাকবে না, পুরো বক্স জুড়েই ছবি থাকবে
                       />
                     </button>
                   ))}
@@ -356,12 +331,9 @@ export default function ProductClient({ product, relatedProducts = [] }) {
                 )}
               </div>
 
-              {/* 🎯 Updated Contentful Rich Text Description */}
-              <div className="mb-8">
-                {product?.description 
-                  ? documentToReactComponents(product.description, renderOptions) 
-                  : null}
-              </div>
+              <p className="text-gray-400 font-light leading-relaxed mb-8 text-lg">
+                {product.description}
+              </p>
 
               {/* Countdown Timer */}
               {product.offerEndsAt && (timeLeft.days > 0 || timeLeft.hours > 0 || timeLeft.minutes > 0 || timeLeft.seconds > 0) && (

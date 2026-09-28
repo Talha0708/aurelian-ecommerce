@@ -21,8 +21,8 @@ export default function ProductClient({ product, relatedProducts = [] }) {
   const [activeImage, setActiveImage] = useState(defaultImage);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const isApparel = product.category === 'apparel';
-  const requiresSize = isApparel && product.sizes && product.sizes.length > 0;
+  // 🎯 FIX: ক্যাটাগরির নাম যাই হোক না কেন, JSON-এ সাইজ থাকলে সেটাই requiresSize হবে
+  const requiresSize = product.sizes && product.sizes.length > 0;
 
   // ==========================================
   // ⏳ COUNTDOWN TIMER LOGIC
@@ -56,7 +56,8 @@ export default function ProductClient({ product, relatedProducts = [] }) {
   const getCurrentStock = () => {
     if (!product.stockInfo) return 0; 
     
-    if (isApparel) {
+    // 🎯 FIX: isApparel এর বদলে requiresSize দিয়ে চেক করা হলো
+    if (requiresSize) {
       if (!selectedSize) return null; 
       return product.stockInfo[selectedSize] !== undefined ? product.stockInfo[selectedSize] : 0;
     } else {
@@ -266,11 +267,10 @@ export default function ProductClient({ product, relatedProducts = [] }) {
                     width={0}
                     height={0}
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    style={{ width: '100%', height: 'auto' }} // 🎯 ইমেজ তার ন্যাচারাল রেশিও অনুযায়ী জায়গা নিবে
+                    style={{ width: '100%', height: 'auto' }} 
                     className="transition-opacity duration-300 group-hover:opacity-90"
                     priority
                   />
-                  {/* Click to view indicator */}
                   <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur border border-white/10 text-white/70 text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
@@ -294,7 +294,7 @@ export default function ProductClient({ product, relatedProducts = [] }) {
                         alt={`Thumbnail ${index + 1}`} 
                         fill 
                         sizes="96px"
-                        className="object-cover" // 🎯 থাম্বনেইলে কোনো প্যাডিং/বর্ডার থাকবে না, পুরো বক্স জুড়েই ছবি থাকবে
+                        className="object-cover" 
                       />
                     </button>
                   ))}
@@ -389,9 +389,9 @@ export default function ProductClient({ product, relatedProducts = [] }) {
                 </div>
               )}
 
-              {/* Stock Status Indicator */}
+              {/* 🎯 FIX: Stock Status Indicator */}
               <div className="mb-8 h-6">
-                {isApparel && !selectedSize ? (
+                {requiresSize && !selectedSize ? (
                   <span className="text-gray-500 text-xs tracking-wider uppercase">Select a size to view availability</span>
                 ) : isOutOfStock ? (
                   <span className="flex items-center gap-2 text-red-500 text-sm tracking-wider uppercase font-medium">

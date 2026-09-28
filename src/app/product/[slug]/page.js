@@ -48,7 +48,7 @@ async function getRelatedProducts(category, currentSlug) {
     const res = await client.getEntries({
       content_type: 'product',
       'fields.category': category,
-      'fields.slug[ne]': currentSlug, // বর্তমান প্রোডাক্ট বাদ দিয়ে অন্যগুলো আনবে
+      'fields.slug[ne]': currentSlug, // বর্তমান প্রোডাক্ট বাদ দিয়ে অন্যগুলো আনবে
       limit: 4, // সাজেশনে সর্বোচ্চ ৪টি প্রোডাক্ট দেখাবে
     });
     return res.items;
@@ -113,9 +113,10 @@ export default async function ProductDetails({ params }) {
 
   const productCategory = category ? category.toLowerCase() : 'apparel';
 
+  // 🎯 FIX: Category jatai hok, JSON e data thakle 'default' baad diye size nibe
   let formattedSizes = [];
-  if (productCategory === 'apparel' && stockInfo) {
-    formattedSizes = Object.keys(stockInfo); 
+  if (stockInfo) {
+    formattedSizes = Object.keys(stockInfo).filter(key => key !== 'default'); 
   }
 
   const finalRegularPrice = regularPrice || 799; 

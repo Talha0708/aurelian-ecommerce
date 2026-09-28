@@ -5,7 +5,6 @@ import { getProducts, client } from '../lib/contentful';
 import Hero from '../components/Hero'; 
 import CountdownTimer from '../components/CountdownTimer';
 
-// 🎯 Contentful থেকে সরাসরি ইমেজ লিংক (Text List) ফেচ করার ফাংশন
 async function getHeroImages() {
   try {
     const response = await client.getEntries({ content_type: 'heroSlider' }); 
@@ -24,7 +23,6 @@ export default async function Home() {
   const products = await getProducts();
   const heroImages = await getHeroImages();
 
-  // প্রোডাক্টগুলোকে ক্যাটাগরি অনুযায়ী গ্রুপ করা হচ্ছে
   const groupedProducts = products.reduce((acc, product) => {
     const category = product.fields.category || 'Exclusive Collection'; 
     if (!acc[category]) {
@@ -43,14 +41,16 @@ export default async function Home() {
         <Hero heroImages={heroImages} />
         
         <div className="relative z-20 flex flex-col items-center justify-center w-full px-4 text-center mt-12">
+          {/* 🎯 Updated Premium Sub-heading */}
           <h2 className="text-amber-500 tracking-[0.3em] uppercase text-xs md:text-sm font-medium mb-4 animate-fade-in-up">
-            Elevating Modern Fashion 
+            The Art of Modern Elegance
           </h2>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-light text-white tracking-widest uppercase mb-6 drop-shadow-2xl">
             Aurelian
           </h1>
+          {/* 🎯 Updated Premium Description */}
           <p className="text-gray-300 text-base md:text-lg max-w-2xl font-light mb-10 tracking-wide drop-shadow-md">
-            Timeless Elegance. Redefining premium Fashion and lifestyle essentials in Bangladesh.
+            Meticulously crafted apparel blending heritage with contemporary design. Redefining premium lifestyle in Bangladesh.
           </p>
 
           <Link 
@@ -58,8 +58,9 @@ export default async function Home() {
             className="group relative inline-flex items-center justify-center px-10 py-4 bg-white/5 backdrop-blur-md border border-amber-600/50 overflow-hidden rounded-md transition-all duration-500 hover:border-amber-500 hover:bg-amber-500/10 shadow-[0_0_20px_rgba(217,119,6,0.1)] hover:shadow-[0_0_30px_rgba(217,119,6,0.2)]"
           >
             <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-amber-600/20 to-amber-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+            {/* 🎯 Updated Button Text */}
             <span className="relative text-white font-medium text-sm md:text-base tracking-widest uppercase group-hover:text-amber-400 transition-colors">
-              Explore Collection
+              Discover the Collection
             </span>
           </Link>
         </div>
@@ -70,16 +71,19 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto">
           
           <div className="flex flex-col items-center mb-16 sm:mb-20">
+            {/* 🎯 Updated Section Title */}
             <h2 className="text-2xl sm:text-3xl md:text-4xl text-amber-500 font-light tracking-[0.2em] uppercase mb-3 text-center">
-              Our Collections
+              Signature Collections
             </h2>
-            <p className="text-gray-400 font-light tracking-wider text-[10px] sm:text-sm uppercase text-center">Curated pieces for every occasion</p>
+            {/* 🎯 Updated Section Subtitle */}
+            <p className="text-gray-400 font-light tracking-wider text-[10px] sm:text-sm uppercase text-center">
+              Masterfully crafted pieces for the modern wardrobe
+            </p>
           </div>
 
           {Object.entries(groupedProducts).map(([categoryName, categoryProducts]) => (
             <div key={categoryName} className="mb-20 last:mb-0">
               
-              {/* ক্যাটাগরি হেডার */}
               <div className="flex flex-col items-start mb-8 sm:mb-10 border-b border-white/10 pb-4">
                 <h3 className="text-xl sm:text-2xl md:text-3xl text-white font-light tracking-[0.15em] uppercase">
                   {categoryName}
@@ -87,7 +91,6 @@ export default async function Home() {
                 <div className="w-12 sm:w-16 h-[2px] bg-amber-600 mt-3 sm:mt-4"></div>
               </div>
 
-              {/* 🎯 FIX: grid-cols-2 দেওয়া হয়েছে যাতে মোবাইলে ২টা করে দেখায়। gap-3 দেওয়া হয়েছে মোবাইলের জন্য। */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-8">
                 {categoryProducts.map((product) => {
                   const { title, slug, regularPrice, salePrice, image, stockInfo, offerEndsAt } = product.fields;
@@ -131,17 +134,14 @@ export default async function Home() {
                           )}
                         </div>
 
-                        {/* 🎯 FIX: মোবাইলের জন্য p-3 (কম প্যাডিং) দেওয়া হয়েছে, ডেস্কটপের জন্য p-6 */}
                         <div className="p-3 sm:p-6 flex flex-col flex-grow justify-between bg-gradient-to-t from-black/40 to-transparent">
                           <div>
-                            {/* 🎯 FIX: মোবাইলে টাইটেল সাইজ একটু ছোট (text-[11px] sm:text-sm) করা হয়েছে */}
                             <h3 className="text-white text-[11px] sm:text-sm font-light tracking-wider uppercase mb-1.5 sm:mb-2 line-clamp-2 transition-colors group-hover:text-amber-400">
                               {title}
                             </h3>
                           </div>
                           <div className="mt-2 sm:mt-4 flex items-center justify-between">
                             <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                              {/* 🎯 FIX: মোবাইলে প্রাইস সাইজ ছোট (text-sm sm:text-lg) করা হয়েছে */}
                               <span className={`font-medium text-sm sm:text-lg ${isOutOfStock ? 'text-gray-500' : 'text-amber-500'}`}>
                                 ৳ {finalSalePrice}
                               </span>
@@ -153,7 +153,7 @@ export default async function Home() {
                             </div>
 
                             <span className={`hidden sm:flex text-[10px] sm:text-xs tracking-widest uppercase items-center gap-1 transition-colors ${isOutOfStock ? 'text-gray-600' : 'text-gray-500 group-hover:text-white'}`}>
-                              View 
+                              Discover 
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 sm:h-4 w-3 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                               </svg>

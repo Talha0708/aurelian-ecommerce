@@ -11,7 +11,6 @@ async function getHeroImages() {
     const response = await client.getEntries({ content_type: 'heroSlider' }); 
     
     if (response.items && response.items.length > 0) {
-      // Contentful-এর imageUrls লিস্ট সরাসরি রিটার্ন করছি
       return response.items[0].fields.imageUrls || [];
     }
     return [];
@@ -25,13 +24,22 @@ export default async function Home() {
   const products = await getProducts();
   const heroImages = await getHeroImages();
 
+  // প্রোডাক্টগুলোকে ক্যাটাগরি অনুযায়ী গ্রুপ করা হচ্ছে
+  const groupedProducts = products.reduce((acc, product) => {
+    const category = product.fields.category || 'Exclusive Collection'; 
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(product);
+    return acc;
+  }, {});
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] selection:bg-amber-500 selection:text-black">
       
       {/* Hero Section */}
       <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
         
-        {/* 🎯 Contentful থেকে পাওয়া লিংকের লিস্ট Hero-তে পাঠানো হলো */}
         <Hero heroImages={heroImages} />
         
         <div className="relative z-20 flex flex-col items-center justify-center w-full px-4 text-center mt-12">
@@ -58,97 +66,109 @@ export default async function Home() {
       </section>
 
       {/* Featured Collection Section */}
-      <section id="collection" className="py-24 px-6 md:px-12 lg:px-24 bg-[#0a0a0a]">
+      <section id="collection" className="py-20 px-4 md:px-12 lg:px-24 bg-[#0a0a0a]">
         <div className="max-w-7xl mx-auto">
           
-          <div className="flex flex-col items-center mb-16">
-            <h2 className="text-3xl md:text-4xl text-white font-light tracking-[0.2em] uppercase mb-4 text-center">
-              Featured Pieces
+          <div className="flex flex-col items-center mb-16 sm:mb-20">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl text-amber-500 font-light tracking-[0.2em] uppercase mb-3 text-center">
+              Our Collections
             </h2>
-            <div className="w-16 h-[1px] bg-amber-600"></div>
+            <p className="text-gray-400 font-light tracking-wider text-[10px] sm:text-sm uppercase text-center">Curated pieces for every occasion</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.map((product) => {
-              const { title, slug, regularPrice, salePrice, image, stockInfo, category, offerEndsAt } = product.fields;
-              const imageUrl = image?.fields?.file?.url ? `https:${image.fields.file.url}` : '/placeholder-image.jpg';
+          {Object.entries(groupedProducts).map(([categoryName, categoryProducts]) => (
+            <div key={categoryName} className="mb-20 last:mb-0">
               
-              const finalRegularPrice = regularPrice || 799;
-              const finalSalePrice = salePrice || finalRegularPrice;
+              {/* ক্যাটাগরি হেডার */}
+              <div className="flex flex-col items-start mb-8 sm:mb-10 border-b border-white/10 pb-4">
+                <h3 className="text-xl sm:text-2xl md:text-3xl text-white font-light tracking-[0.15em] uppercase">
+                  {categoryName}
+                </h3>
+                <div className="w-12 sm:w-16 h-[2px] bg-amber-600 mt-3 sm:mt-4"></div>
+              </div>
 
-              let totalStock = 0;
-              if (stockInfo) {
-                Object.values(stockInfo).forEach((qty) => {
-                  totalStock += (typeof qty === 'number' ? qty : 0);
-                });
-              }
-              const isOutOfStock = totalStock === 0;
+              {/* 🎯 FIX: grid-cols-2 দেওয়া হয়েছে যাতে মোবাইলে ২টা করে দেখায়। gap-3 দেওয়া হয়েছে মোবাইলের জন্য। */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-8">
+                {categoryProducts.map((product) => {
+                  const { title, slug, regularPrice, salePrice, image, stockInfo, offerEndsAt } = product.fields;
+                  const imageUrl = image?.fields?.file?.url ? `https:${image.fields.file.url}` : '/placeholder-image.jpg';
+                  
+                  const finalRegularPrice = regularPrice || 799;
+                  const finalSalePrice = salePrice || finalRegularPrice;
 
-              return (
-                <Link href={`/product/${slug}`} key={product.sys.id} className="group cursor-pointer">
-                  <div className="relative glass-panel bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden transition-all duration-500 hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-900/20 h-full flex flex-col">
-                    
-                    {category && (
-                      <div className="absolute top-4 left-4 z-10 bg-black/70 backdrop-blur-md border border-amber-500/30 px-3 py-1.5 rounded-full text-[10px] text-amber-500 uppercase tracking-widest shadow-lg">
-                        {category}
-                      </div>
-                    )}
+                  let totalStock = 0;
+                  if (stockInfo) {
+                    Object.values(stockInfo).forEach((qty) => {
+                      totalStock += (typeof qty === 'number' ? qty : 0);
+                    });
+                  }
+                  const isOutOfStock = totalStock === 0;
 
-                    <div className="relative w-full aspect-[4/5] overflow-hidden bg-black/50">
-                      <Image
-                        src={imageUrl}
-                        alt={title || 'Aurelian Product'}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                        className={`object-cover transition-transform duration-700 group-hover:scale-110 ${isOutOfStock ? 'opacity-40 grayscale' : 'opacity-90 group-hover:opacity-100'}`}
-                      />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500"></div>
-                      
-                      {!isOutOfStock && offerEndsAt && (
-                        <CountdownTimer offerEndsAt={offerEndsAt} />
-                      )}
-                      
-                      {isOutOfStock && (
-                        <div className="absolute inset-0 flex items-center justify-center z-10">
-                          <span className="bg-red-900/80 border border-red-500/50 text-white px-6 py-2 rounded-md text-xs uppercase tracking-[0.2em] backdrop-blur-sm">
-                            Sold Out
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-6 flex flex-col flex-grow justify-between bg-gradient-to-t from-black/40 to-transparent">
-                      <div>
-                        <h3 className="text-white text-sm font-light tracking-wider uppercase mb-2 line-clamp-2 transition-colors group-hover:text-amber-400">
-                          {title}
-                        </h3>
-                      </div>
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-medium text-lg ${isOutOfStock ? 'text-gray-500' : 'text-amber-500'}`}>
-                            ৳ {finalSalePrice}
-                          </span>
-                          {finalRegularPrice > finalSalePrice && !isOutOfStock && (
-                            <span className="text-xs text-gray-500 line-through">
-                              ৳ {finalRegularPrice}
-                            </span>
+                  return (
+                    <Link href={`/product/${slug}`} key={product.sys.id} className="group cursor-pointer">
+                      <div className="relative glass-panel bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden transition-all duration-500 hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-900/20 h-full flex flex-col">
+                        
+                        <div className="relative w-full aspect-[4/5] overflow-hidden bg-black/50">
+                          <Image
+                            src={imageUrl}
+                            alt={title || 'Aurelian Product'}
+                            fill
+                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                            className={`object-cover transition-transform duration-700 group-hover:scale-110 ${isOutOfStock ? 'opacity-40 grayscale' : 'opacity-90 group-hover:opacity-100'}`}
+                          />
+                          <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500"></div>
+                          
+                          {!isOutOfStock && offerEndsAt && (
+                            <CountdownTimer offerEndsAt={offerEndsAt} />
+                          )}
+                          
+                          {isOutOfStock && (
+                            <div className="absolute inset-0 flex items-center justify-center z-10">
+                              <span className="bg-red-900/80 border border-red-500/50 text-white px-3 sm:px-6 py-1.5 sm:py-2 rounded-md text-[10px] sm:text-xs uppercase tracking-[0.2em] backdrop-blur-sm">
+                                Sold Out
+                              </span>
+                            </div>
                           )}
                         </div>
 
-                        <span className={`text-xs tracking-widest uppercase flex items-center gap-1 transition-colors ${isOutOfStock ? 'text-gray-600' : 'text-gray-500 group-hover:text-white'}`}>
-                          View 
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        </span>
-                      </div>
-                    </div>
+                        {/* 🎯 FIX: মোবাইলের জন্য p-3 (কম প্যাডিং) দেওয়া হয়েছে, ডেস্কটপের জন্য p-6 */}
+                        <div className="p-3 sm:p-6 flex flex-col flex-grow justify-between bg-gradient-to-t from-black/40 to-transparent">
+                          <div>
+                            {/* 🎯 FIX: মোবাইলে টাইটেল সাইজ একটু ছোট (text-[11px] sm:text-sm) করা হয়েছে */}
+                            <h3 className="text-white text-[11px] sm:text-sm font-light tracking-wider uppercase mb-1.5 sm:mb-2 line-clamp-2 transition-colors group-hover:text-amber-400">
+                              {title}
+                            </h3>
+                          </div>
+                          <div className="mt-2 sm:mt-4 flex items-center justify-between">
+                            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                              {/* 🎯 FIX: মোবাইলে প্রাইস সাইজ ছোট (text-sm sm:text-lg) করা হয়েছে */}
+                              <span className={`font-medium text-sm sm:text-lg ${isOutOfStock ? 'text-gray-500' : 'text-amber-500'}`}>
+                                ৳ {finalSalePrice}
+                              </span>
+                              {finalRegularPrice > finalSalePrice && !isOutOfStock && (
+                                <span className="text-[10px] sm:text-xs text-gray-500 line-through">
+                                  ৳ {finalRegularPrice}
+                                </span>
+                              )}
+                            </div>
 
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+                            <span className={`hidden sm:flex text-[10px] sm:text-xs tracking-widest uppercase items-center gap-1 transition-colors ${isOutOfStock ? 'text-gray-600' : 'text-gray-500 group-hover:text-white'}`}>
+                              View 
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 sm:h-4 w-3 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                              </svg>
+                            </span>
+                          </div>
+                        </div>
+
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+            </div>
+          ))}
 
         </div>
       </section>
